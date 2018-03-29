@@ -6,7 +6,7 @@ package lexer;
  * 分隔符
  */
 public class Separator extends Word {
-    public Separator(String s, int tag) {
+    public Separator(String s, String tag) {
         super(s, tag);
     }
 

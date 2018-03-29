@@ -5,7 +5,7 @@ package lexer;
  * @Date: Created in 16:21 2018/3/29 0029
  */
 public class Keyword extends Word{
-    public Keyword(String s, int tag){
+    public Keyword(String s, String tag){
         super(s, tag);
     }
     public static final Keyword

@@ -5,21 +5,21 @@ package lexer;
  * @Date: Created in 15:36 2018/3/29 0029
  */
 public class Tag {
-    public final static int
+    public final static String
         // 关键词
-        IF = 256, THEN = 257, ELSE = 258, WHILE = 259, DO = 260,
+        IF = "IF", THEN = "THEN", ELSE = "ELSE", WHILE = "WHILE", DO = "DO",
         // 操作符
-        ADD = 261, DIFF = 262, MUL = 263, DIV = 264, GT = 265, LT = 266,
-        EQ = 267, GE = 268, LE = 269, NE = 270, NOT = 271,
+        ADD = "ADD", DIFF = "DIFF", MUL = "MUL", DIV = "DIV", GT = "GT", LT = "LT",
+        EQ = "EQ", GE = "GE", LE = "LE", NE = "NE", NOT = "NOT",
         // 基础数据类型
-        BASIC = 272,
+        BASIC = "BASIC",
         // 标识符
-        ID = 273,
+        ID = "ID",
         // 分隔符
-        ASSIGN = 274, SLP = 275/*左括号*/, SRP = 276/*右括号*/, SEMI = 277/*分号*/,
+        ASSIGN = "ASSIGN", SLP = "SLP"/*左括号*/, SRP = "SRP"/*右括号*/, SEMI = "SEMI"/*分号*/,
         // 数字
-        NUM = 278,
+        NUM = "NUM",
         // 出错处理
-        ERROR = 279;
+        ERROR = "ERROR";
 
 }

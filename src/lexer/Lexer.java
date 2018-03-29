@@ -123,7 +123,7 @@ public class Lexer {
         if(keyword.containsKey(String.valueOf(temp))){
             return keyword.get(String.valueOf(temp));
         }
-        return new Token(temp);
+        return new Token(String.valueOf(temp));
     }
 
     void nextChar() throws Exception{

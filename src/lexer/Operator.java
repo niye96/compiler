@@ -6,7 +6,7 @@ package lexer;
  * 操作符
  */
 public class Operator extends Word {
-    public Operator(String s, int tag){
+    public Operator(String s, String tag){
         super(s,tag);
     }
     public static final Operator
