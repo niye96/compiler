@@ -1,6 +1,7 @@
 package lexer;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,35 +10,55 @@ import java.util.Map;
  * @Date: Created in 16:46 2018/3/29 0029
  */
 public class Lexer {
-    public static Map<String, Word> keyword = null;
+    public Map<String, Word> words = new HashMap<>();
     public StringBuffer buffer;
     // 缓冲区指针
     public int pos = -1;
     // 当前行
     public int line = 0;
     // 当前字符
-    char now;
+    char now = ' ';
     public Lexer() {
-        if (keyword == null) {
-            keyword = new HashMap();
-            initMap(Keyword.IF);
-            initMap(Keyword.THEN);
-            initMap(Keyword.ELSE);
-            initMap(Keyword.WHILE);
-            initMap(Keyword.DO);
-            initMap(BasicType.INT);
-            initMap(Separator.SEMI);
-            initMap(Separator.SLP);
-            initMap(Separator.SRP);
-            initMap(Operator.ADD);
-            initMap(Operator.DIFF);
-            initMap(Operator.MUL);
-            initMap(Operator.DIV);
+        words = new HashMap();
+        // 添加关键字
+        try {
+            Class keywordClazz = Class.forName("lexer.Keyword");
+            Field[] fields = keywordClazz.getDeclaredFields();
+            for(Field field : fields) {
+                Object obj = field.get(keywordClazz);
+                if(obj instanceof Word)
+                    initMap((Word)obj);
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
+
+        // 添加分隔符
+        try {
+            Class separatorClazz = Class.forName("lexer.Separator");
+            Field[] fields = separatorClazz.getDeclaredFields();
+            for(Field field : fields) {
+                Object obj = field.get(separatorClazz);
+                if(obj instanceof Word)
+                    initMap((Word)obj);
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        initMap(BasicType.INT);
+        initMap(Operator.ADD);
+        initMap(Operator.DIFF);
+        initMap(Operator.MUL);
+        initMap(Operator.DIV);
     }
 
     void initMap(Word word) {
-        keyword.put(word.lexeme, word);
+        words.put(word.lexeme, word);
     }
 
     public void readFile(File file) {
@@ -80,9 +101,11 @@ public class Lexer {
             }while(Character.isLetterOrDigit(now));
             String w = word.toString();
             // 判断是否为关键字
-            Word found = keyword.get(w);
+            Word found = words.get(w);
             if (found == null) {
-                return new Id(w);
+                Id id = new Id(w);
+                words.put(Tag.ID, id);
+                return id;
             } else {
                 return found;
             }
@@ -96,8 +119,15 @@ public class Lexer {
                 nextChar();
             } while (Character.isDigit(now));
             // 判断数字后面如果是字符，则出错
-            if (Character.isLetter(now) || now == '{' || now == '(')
-                return new Error("非法标识符",line);
+            if (Character.isLetter(now) || now == '{' || now == '('){
+                StringBuffer errorId = new StringBuffer();
+                errorId.append(num);
+                do{
+                    errorId.append(now);
+                    nextChar();
+                } while(Character.isLetterOrDigit(now));
+                return new Error("非法标识符 " + errorId.toString(),line);
+            }
             return new Num(num);
         }
         //判断是否为运算符或分隔符
@@ -120,8 +150,8 @@ public class Lexer {
 
         char temp = now;
         now = ' ';
-        if(keyword.containsKey(String.valueOf(temp))){
-            return keyword.get(String.valueOf(temp));
+        if(words.containsKey(String.valueOf(temp))){
+            return words.get(String.valueOf(temp));
         }
         return new Token(String.valueOf(temp));
     }
