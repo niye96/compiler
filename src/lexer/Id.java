@@ -12,6 +12,6 @@ public class Id extends Word{
 
     @Override
     public String toString() {
-        return "id:\t" + lexeme;
+        return "(ID," + lexeme + ")";
     }
 }

@@ -17,6 +17,6 @@ public class Keyword extends Word{
 
     @Override
     public String toString() {
-        return "keyword:\t" + lexeme;
+        return "(" + tag +",_)";
     }
 }

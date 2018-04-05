@@ -1,0 +1,5 @@
+E   →  TA
+A  →  +TA | ε
+T   →  FBAc
+B  →  *FB | ε
+F  →  (E) | i |ε

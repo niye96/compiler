@@ -4,13 +4,15 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @Author: ny
  * @Date: Created in 16:46 2018/3/29 0029
  */
 public class Lexer {
-    public Map<String, Word> words = new HashMap<>();
+    public Map<String, Word> tokens = new HashMap<>();
+    public Map<String, Id> words = new HashMap<>();
     public StringBuffer buffer;
     // 缓冲区指针
     public int pos = -1;
@@ -19,7 +21,6 @@ public class Lexer {
     // 当前字符
     char now = ' ';
     public Lexer() {
-        words = new HashMap();
         // 添加关键字
         try {
             Class keywordClazz = Class.forName("lexer.Keyword");
@@ -58,7 +59,7 @@ public class Lexer {
     }
 
     void initMap(Word word) {
-        words.put(word.lexeme, word);
+        tokens.put(word.lexeme, word);
     }
 
     public void readFile(File file) {
@@ -101,10 +102,11 @@ public class Lexer {
             }while(Character.isLetterOrDigit(now));
             String w = word.toString();
             // 判断是否为关键字
-            Word found = words.get(w);
+            Word found = tokens.get(w);
             if (found == null) {
                 Id id = new Id(w);
-                words.put(Tag.ID, id);
+//                tokens.put(Tag.ID, id);
+                words.put(id.lexeme, id);
                 return id;
             } else {
                 return found;
@@ -150,8 +152,8 @@ public class Lexer {
 
         char temp = now;
         now = ' ';
-        if(words.containsKey(String.valueOf(temp))){
-            return words.get(String.valueOf(temp));
+        if(tokens.containsKey(String.valueOf(temp))){
+            return tokens.get(String.valueOf(temp));
         }
         return new Token(String.valueOf(temp));
     }
@@ -172,5 +174,21 @@ public class Lexer {
         }catch (Exception e){
             System.out.println("结束");
         }
+        System.out.println("\n\n***********token表**************");
+        printMap(tokens);
+        System.out.println("\n\n***********符号表**************");
+        printMap(words);
+    }
+
+    public void printMap(Map map){
+        Set<Map.Entry> entrySet = map.entrySet();
+        for(Map.Entry entry : entrySet){
+            Object val = entry.getValue();
+            if(val instanceof Word){
+                System.out.println("("+((Word) val).lexeme+","+"_)");
+
+            }
+        }
+
     }
 }

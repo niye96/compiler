@@ -18,6 +18,6 @@ public class Separator extends Word {
 
     @Override
     public String toString() {
-        return "separator:\t" + lexeme;
+        return "("+ tag + ",_)";
     }
 }

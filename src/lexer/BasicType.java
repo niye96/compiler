@@ -13,6 +13,6 @@ public class BasicType extends Word{
         INT = new BasicType("int");
     @Override
     public String toString() {
-        return "basicType:\t" + lexeme;
+        return "(BASIC,"+lexeme+")";
     }
 }

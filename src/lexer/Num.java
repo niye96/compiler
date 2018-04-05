@@ -14,6 +14,6 @@ public class Num extends Token{
 
     @Override
     public String toString() {
-        return "num:\t" + value;
+        return "(NUM,"+value+")";
     }
 }

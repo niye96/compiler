@@ -24,6 +24,6 @@ public class Operator extends Word {
 
     @Override
     public String toString() {
-        return "operator:\t" + lexeme;
+        return "(RELOP," + tag + ")";
     }
 }
