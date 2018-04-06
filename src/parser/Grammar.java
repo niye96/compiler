@@ -14,14 +14,14 @@ public class Grammar {
     public Map<String, Production> grammar;
     public Set<String> termination;
     public Set<String> nontermination;
-    public Symbol begin;
+    public String begin;
 
     public Grammar(File file, String begin){
         grammar = new HashMap<>();
         termination = new HashSet<>();
         nontermination = new HashSet<>();
         readFile(file);
-        this.begin =  grammar.get(begin).left;
+        this.begin =  begin;
     }
 
     public void readFile(File file){
@@ -81,9 +81,10 @@ public class Grammar {
             } else {
                 switch (c){
                     case '=':
-                        if(i + 1 < len && str.charAt(i + 1) == '=')
+                        if(i + 1 < len && str.charAt(i + 1) == '=') {
                             symbol = new Symbol("==", Symbol.TERMINATION);
-                        else
+                            i++;
+                        } else
                             symbol = new Symbol("=", Symbol.TERMINATION);
                         break;
                     default:

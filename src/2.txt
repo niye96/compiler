@@ -1,5 +1,20 @@
-E   →  TA
-A  →  +TA | ε
-T   →  FBAc
-B  →  *FB | ε
-F  →  (E) | i |ε
+P → D S
+D →L id ; D |ε
+L → int | float
+S → id = E
+S → if (C)  S
+S → if (C)  S  else   S
+S → while (C)  S
+S → S ;S
+C → E > E
+C → E < E
+C → E  ==  E
+E → E + T
+E → E - T
+E → T
+T → F
+T → T * F
+T → T / F
+F → ( E )
+F → id
+F → int10

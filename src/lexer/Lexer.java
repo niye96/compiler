@@ -98,7 +98,12 @@ public class Lexer {
             StringBuffer word = new StringBuffer();
             do{
                 word.append(now);
-                nextChar();
+                try {
+                    nextChar();
+                }catch (Exception e){
+                    // 读到文件末尾不做处理
+                    now = ' ';
+                }
             }while(Character.isLetterOrDigit(now));
             String w = word.toString();
             // 判断是否为关键字
@@ -135,18 +140,30 @@ public class Lexer {
         //判断是否为运算符或分隔符
         if (now == '>') {
             nextChar();
-            if(now == '=') return Operator.GE;
+            if(now == '=') {
+                nextChar();
+                return Operator.GE;
+            }
             else return Operator.GT;
         } else if (now == '<') {
             nextChar();
-            if(now == '=') return Operator.LE;
+            if(now == '='){
+                nextChar();
+                return Operator.LE;
+            }
             else return Operator.LT;
         } else if (now == '=') {
             nextChar();
-            if(now == '=') return Operator.EQ;
+            if(now == '=') {
+                nextChar();
+                return Operator.EQ;
+            }
             return Separator.ASSIGN;
         } else if (now == '!') {
-            if(now == '=') return Operator.NE;
+            if(now == '=') {
+                nextChar();
+                return Operator.NE;
+            }
             else return Operator.NOT;
         }
 
