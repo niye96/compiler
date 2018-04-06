@@ -10,7 +10,7 @@ public class Main {
         Lexer lexer = new Lexer();
         lexer.readFile(new File("F:\\compiler\\src\\1.txt"));
 //        lexer.output();
-        Parser parser = new Parser(lexer, new Grammar(new File("F:\\compiler\\src\\2.txt"), "P"));
+        Parser parser = new Parser(lexer, new Grammar(new File("F:\\compiler\\src\\2.txt"), "S"));
         parser.parse();
     }
 }
