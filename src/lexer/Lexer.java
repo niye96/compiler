@@ -17,7 +17,7 @@ public class Lexer {
     // 缓冲区指针
     public int pos = -1;
     // 当前行
-    public int line = 0;
+    public int line = 1;
     // 当前字符
     char now = ' ';
     public Lexer() {

@@ -19,5 +19,17 @@ public class Production {
         right.add(symbols);
     }
 
-
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(left.toString() + "->");
+        for(int i = 0; i < right.size(); i++){
+            for(int j = 0; j < right.get(i).size(); j++){
+                buffer.append(right.get(i).get(j).toString() + " ");
+            }
+            if(i < right.size() - 1)
+                buffer.append("|");
+        }
+        return buffer.toString();
+    }
 }

@@ -22,15 +22,15 @@ Parser类用来求解first、follow集，以及用来求SLR分析表
 
 >  文法
 
-    ```
-    S → E  
-    E → E+T
-    E → T
-    T → T * F
-    T → F
-    F → (E)
-    F → id
-    ```
+```
+S → E  
+E → E+T
+E → T
+T → T * F
+T → F
+F → (E)
+F → id
+```
     
 > 分析代码段
 ```

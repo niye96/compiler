@@ -16,7 +16,7 @@ public class Parser {
     private Map<String, Set<String>> follow;
     private List<Closure> closures;
     private List<Goto> gotos;
-    private Map<String, Object>[] LRTable;
+    private Map<String, Object>[] SLRTable;
 
     public Parser(Lexer lexer, Grammar grammar){
         this.lexer = lexer;
@@ -37,10 +37,10 @@ public class Parser {
             now = scan();
             while (true){
                 // 为空则开始读入字符，否则进行规约
-                Object obj = LRTable[stack.lastElement()].get(now);
+                Object obj = SLRTable[stack.lastElement()].get(now);
                 if(obj == null || obj instanceof Integer) {
                     tokens.push(now);
-                    stack.push((Integer) LRTable[stack.lastElement()].get(now));
+                    stack.push((Integer) SLRTable[stack.lastElement()].get(now));
                     now = scan();
                 }else{
                     // 开始规约
@@ -51,7 +51,7 @@ public class Parser {
                         stack.pop();
                     }
                     tokens.push(token);
-                    stack.push((Integer) LRTable[stack.lastElement()].get(token));
+                    stack.push((Integer) SLRTable[stack.lastElement()].get(token));
                 }
                 // 输出栈和符号栈情况
                 System.out.print("(");
@@ -66,12 +66,18 @@ public class Parser {
                 System.out.println(")");
             }
         }catch (Exception e){
-            now = "$";
-            Object result = LRTable[stack.lastElement()].get(now);
+            String end = "$";
+            Object result = null;
+            try {
+                result = SLRTable[stack.lastElement()].get(end);
+            }catch (Exception var){
+
+            }
             if("acc".equals(result)){
                 System.out.println("匹配成功");
             }else{
                 System.out.println("匹配失败");
+                System.out.println("第" + lexer.line + "行发生错误");
             }
         }
     }
@@ -104,7 +110,7 @@ public class Parser {
         calc();
         outputGoto();
         // 生成LR表
-        calLRTable();
+        calSLRTable();
     }
     public void getFirst(){
         // 非终止符号集合
@@ -126,7 +132,7 @@ public class Parser {
                     result.add(symbol.str);
                     break;
                 }else{
-                    if(key.equals(symbol.str)) continue;
+                    if(key.equals(symbol.str)) break;
                     else{
                         //如果first集中以求解出，则直接使用，否则递归求解
                         Set<String> nextFirst = null;
@@ -321,16 +327,17 @@ public class Parser {
         for(int i = 0; i < gotos.size(); i++){
             System.out.println(gotos.get(i));
         }
+        System.out.println("\n\n\n\n\n");
     }
 
-    public void calLRTable(){
-        LRTable = new HashMap[closures.size()];
-        for(int i = 0; i < LRTable.length; i++){
-            LRTable[i] = new HashMap<>();
+    public void calSLRTable(){
+        SLRTable = new HashMap[closures.size()];
+        for(int i = 0; i < SLRTable.length; i++){
+            SLRTable[i] = new HashMap<>();
         }
         for(int i = 0, len = gotos.size(); i < len; i++){
             Goto go = gotos.get(i);
-            LRTable[go.from].put(go.symbol.str, go.to);
+            SLRTable[go.from].put(go.symbol.str, go.to);
         }
         for(int i = 0, len1 = closures.size(); i < len1; i++) {
             Closure closure = closures.get(i);
@@ -350,9 +357,9 @@ public class Parser {
                     Set<String> follow = this.follow.get(node.left.str);
                     for (String key : follow) {
                         if (node.left.str.equals(grammar.begin)) {
-                            LRTable[i].put(key, "acc");
+                            SLRTable[i].put(key, "acc");
                         } else {
-                            LRTable[i].put(key, new Object[]{node.left.str, node.right.size()});
+                            SLRTable[i].put(key, new Object[]{node.left.str, node.right.size()});
                         }
                     }
                 }
