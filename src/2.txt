@@ -1,7 +1,17 @@
-S → E
-E → E+T
+P → S
+S → M | O
+M → if (C) then M else M | B
+O → if (C) then S | if (C) then M else O
+B → id = E;
+C → E > E
+C → E < E
+C → E  ==  E
+E → E + T
+E → E – T
 E → T
-T → T * F
 T → F
-F → (E)
+T → T * F
+T → T / F
+F → ( E )
 F → id
+F → int10

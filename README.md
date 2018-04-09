@@ -23,109 +23,167 @@ Parser类用来求解first、follow集，以及用来求SLR分析表
 >  文法
 
 ```
-S → E  
-E → E+T
+P → S
+S → M | O
+M → if (C) then M else M | B
+O → if (C) then S | if (C) then M else O
+B → id = E;
+C → E > E
+C → E < E
+C → E  ==  E
+E → E + T
+E → E – T
 E → T
-T → T * F
 T → F
-F → (E)
+T → T * F
+T → T / F
+F → ( E )
 F → id
+F → int10
 ```
     
 > 分析代码段
 ```
-a + b + c
+if ( a == 4 ) then
+    cc = 4;
+else
+    if ( b > c ) then
+        ab = 6 + 4;
+    else
+        l = 5;
 ```
 
 > first、follow集输出
 ```
-FIRST(S)={(,*,+,id}
-FIRST(T)={(,*,id}
-FIRST(E)={(,*,+,id}
-FIRST(F)={(,id}
+FIRST(P)={id,if}
+FIRST(B)={id}
+FIRST(S)={id,if}
+FIRST(C)={int10,(,id}
+FIRST(T)={int10,(,id}
+FIRST(E)={int10,(,id}
+FIRST(F)={int10,(,id}
+FIRST(M)={id,if}
+FIRST(O)={if}
 
+FOLLOW(P)={$}
+FOLLOW(B)={$,else}
 FOLLOW(S)={$}
-FOLLOW(T)={$,),*,+}
-FOLLOW(E)={$,),+}
-FOLLOW(F)={$,),*,+}
+FOLLOW(C)={)}
+FOLLOW(T)={==,–,),*,;,+,<,>,/}
+FOLLOW(E)={==,–,),;,+,<,>}
+FOLLOW(F)={==,–,),*,;,+,<,>,/}
+FOLLOW(M)={$,else}
+FOLLOW(O)={$}
 ```
 
 > closure集合输出
 ```
 第0个状态
-S → ·E 
-E → ·E + T 
-E → ·T 
-T → ·T * F 
-T → ·F 
-F → ·( E ) 
-F → ·id 
-*******************
+P → ·S 
+S → ·M 
+S → ·O 
+M → ·if ( C ) then M else M 
+M → ·B 
+O → ·if ( C ) then S 
+O → ·if ( C ) then M else O 
+B → ·id = E ; 
+
+
 第1个状态
-F → ( ·E ) 
-E → ·E + T 
-E → ·T 
-T → ·T * F 
-T → ·F 
-F → ·( E ) 
-F → ·id 
-*******************
+M → if ·( C ) then M else M 
+O → if ·( C ) then S 
+O → if ·( C ) then M else O 
+
+
 第2个状态
-F → id ·
-*******************
+B → id ·= E ; 
+
+
 第3个状态
-S → E ·
-E → E ·+ T 
-*******************
+P → S ·
+
+
 第4个状态
-E → T ·
-T → T ·* F 
-*******************
+S → M ·
+
+
 第5个状态
-T → F ·
-*******************
+S → O ·
+
+
 第6个状态
-F → ( E ·) 
-E → E ·+ T 
-*******************
-第7个状态
-E → E + ·T 
-T → ·T * F 
-T → ·F 
-F → ·( E ) 
-F → ·id 
-*******************
-第8个状态
-T → T * ·F 
-F → ·( E ) 
-F → ·id 
-*******************
-第9个状态
-F → ( E ) ·
-*******************
-第10个状态
-E → E + T ·
-T → T ·* F 
-*******************
-第11个状态
-T → T * F ·
+M → B ·
+……
+省略
+……
 ```
 > 分析过程输出
 ```
-(0 2 )     (id )
-(0 5 )     (F )
-(0 4 )     (T )
-(0 3 )     (E )
-(0 3 7 )     (E + )
-(0 3 7 2 )     (E + id )
-(0 3 7 5 )     (E + F )
-(0 3 7 10 )     (E + T )
-(0 3 )     (E )
-(0 3 7 )     (E + )
-(0 3 7 2 )     (E + id )
-(0 3 7 5 )     (E + F )
-(0 3 7 10 )     (E + T )
-(0 3 )     (E )
+(0 1 )     (if )
+(0 1 7 )     (if ( )
+(0 1 7 10 )     (if ( id )
+(0 1 7 15 )     (if ( F )
+(0 1 7 14 )     (if ( T )
+(0 1 7 13 )     (if ( E )
+(0 1 7 13 21 )     (if ( E == )
+(0 1 7 13 21 11 )     (if ( E == int10 )
+(0 1 7 13 21 15 )     (if ( E == F )
+(0 1 7 13 21 14 )     (if ( E == T )
+(0 1 7 13 21 31 )     (if ( E == E )
+(0 1 7 12 )     (if ( C )
+(0 1 7 12 18 )     (if ( C ) )
+(0 1 7 12 18 28 )     (if ( C ) then )
+(0 1 7 12 18 28 2 )     (if ( C ) then id )
+(0 1 7 12 18 28 2 8 )     (if ( C ) then id = )
+(0 1 7 12 18 28 2 8 11 )     (if ( C ) then id = int10 )
+(0 1 7 12 18 28 2 8 15 )     (if ( C ) then id = F )
+(0 1 7 12 18 28 2 8 14 )     (if ( C ) then id = T )
+(0 1 7 12 18 28 2 8 16 )     (if ( C ) then id = E )
+(0 1 7 12 18 28 2 8 16 26 )     (if ( C ) then id = E ; )
+(0 1 7 12 18 28 6 )     (if ( C ) then B )
+(0 1 7 12 18 28 36 )     (if ( C ) then M )
+(0 1 7 12 18 28 36 38 )     (if ( C ) then M else )
+(0 1 7 12 18 28 36 38 1 )     (if ( C ) then M else if )
+(0 1 7 12 18 28 36 38 1 7 )     (if ( C ) then M else if ( )
+(0 1 7 12 18 28 36 38 1 7 10 )     (if ( C ) then M else if ( id )
+(0 1 7 12 18 28 36 38 1 7 15 )     (if ( C ) then M else if ( F )
+(0 1 7 12 18 28 36 38 1 7 14 )     (if ( C ) then M else if ( T )
+(0 1 7 12 18 28 36 38 1 7 13 )     (if ( C ) then M else if ( E )
+(0 1 7 12 18 28 36 38 1 7 13 19 )     (if ( C ) then M else if ( E > )
+(0 1 7 12 18 28 36 38 1 7 13 19 10 )     (if ( C ) then M else if ( E > id )
+(0 1 7 12 18 28 36 38 1 7 13 19 15 )     (if ( C ) then M else if ( E > F )
+(0 1 7 12 18 28 36 38 1 7 13 19 14 )     (if ( C ) then M else if ( E > T )
+(0 1 7 12 18 28 36 38 1 7 13 19 29 )     (if ( C ) then M else if ( E > E )
+(0 1 7 12 18 28 36 38 1 7 12 )     (if ( C ) then M else if ( C )
+(0 1 7 12 18 28 36 38 1 7 12 18 )     (if ( C ) then M else if ( C ) )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 )     (if ( C ) then M else if ( C ) then )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 2 )     (if ( C ) then M else if ( C ) then id )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 2 8 )     (if ( C ) then M else if ( C ) then id = )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 2 8 11 )     (if ( C ) then M else if ( C ) then id = int10 )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 2 8 15 )     (if ( C ) then M else if ( C ) then id = F )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 2 8 14 )     (if ( C ) then M else if ( C ) then id = T )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 2 8 16 )     (if ( C ) then M else if ( C ) then id = E )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 2 8 16 22 )     (if ( C ) then M else if ( C ) then id = E + )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 2 8 16 22 11 )     (if ( C ) then M else if ( C ) then id = E + int10 )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 2 8 16 22 15 )     (if ( C ) then M else if ( C ) then id = E + F )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 2 8 16 22 32 )     (if ( C ) then M else if ( C ) then id = E + T )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 2 8 16 )     (if ( C ) then M else if ( C ) then id = E )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 2 8 16 26 )     (if ( C ) then M else if ( C ) then id = E ; )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 6 )     (if ( C ) then M else if ( C ) then B )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 36 )     (if ( C ) then M else if ( C ) then M )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 36 38 )     (if ( C ) then M else if ( C ) then M else )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 36 38 2 )     (if ( C ) then M else if ( C ) then M else id )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 36 38 2 8 )     (if ( C ) then M else if ( C ) then M else id = )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 36 38 2 8 11 )     (if ( C ) then M else if ( C ) then M else id = int10 )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 36 38 2 8 15 )     (if ( C ) then M else if ( C ) then M else id = F )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 36 38 2 8 14 )     (if ( C ) then M else if ( C ) then M else id = T )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 36 38 2 8 16 )     (if ( C ) then M else if ( C ) then M else id = E )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 36 38 2 8 16 26 )     (if ( C ) then M else if ( C ) then M else id = E ; )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 36 38 6 )     (if ( C ) then M else if ( C ) then M else B )
+(0 1 7 12 18 28 36 38 1 7 12 18 28 36 38 39 )     (if ( C ) then M else if ( C ) then M else M )
+(0 1 7 12 18 28 36 38 39 )     (if ( C ) then M else M )
+(0 4 )     (M )
+(0 3 )     (S )
 匹配成功
 ```
 

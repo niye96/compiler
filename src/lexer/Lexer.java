@@ -123,7 +123,12 @@ public class Lexer {
             do {
                 num *= 10;
                 num += Character.digit(now, 10);
-                nextChar();
+                try {
+                    nextChar();
+                }catch (Exception e){
+                    // 读到文件末尾不做处理
+                    now = ' ';
+                }
             } while (Character.isDigit(now));
             // 判断数字后面如果是字符，则出错
             if (Character.isLetter(now) || now == '{' || now == '('){

@@ -10,7 +10,8 @@ import java.util.List;
 public class Production {
     public Symbol left;
     public List<List<Symbol>> right;
-    public int pos = 0;
+    public boolean existNull;
+
     public Production(String left){
         this.left = new Symbol(left, Symbol.NONTERMINATION);
         this.right = new ArrayList<>();
@@ -31,5 +32,11 @@ public class Production {
                 buffer.append("|");
         }
         return buffer.toString();
+    }
+    public boolean existNull(){
+        return existNull;
+    }
+    public void setExistNull(boolean existNull){
+        this.existNull = existNull;
     }
 }

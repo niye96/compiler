@@ -36,11 +36,17 @@ public class Grammar {
                 nontermination.add(s1[0]);
                 for(int i = 0; i < s2.length; i++) {
                     if(!"".equals(s2[i].trim())){
-                        Production production = new Production(s1[0]);
+                        Object[] result = resolve(s2[i]);
+                        Production production = null;
                         if(grammar.containsKey(s1[0])){
-                            grammar.get(s1[0]).add(resolve(s2[i]));
+                            production = grammar.get(s1[0]);
+                            production.add((List<Symbol>)result[0]);
+                            production.setExistNull((boolean)result[1]);
+
                         }else{
-                            production.add(resolve(s2[i]));
+                            production = new Production(s1[0]);
+                            production.add((List<Symbol>)result[0]);
+                            production.setExistNull((boolean)result[1]);
                             grammar.put(s1[0], production);
                         }
                     }
@@ -62,7 +68,8 @@ public class Grammar {
             }
         }
     }
-    public List<Symbol> resolve(String str){
+    public Object[] resolve(String str){
+        boolean existNull = false;
         List<Symbol> right = new ArrayList<>();
         for(int i = 0, len = str.length(); i < len; i++){
             Symbol symbol = null;
@@ -87,6 +94,8 @@ public class Grammar {
                         } else
                             symbol = new Symbol("=", Symbol.TERMINATION);
                         break;
+                    case 'ε':
+                        existNull = true;
                     default:
                         symbol = new Symbol(String.valueOf(c), Symbol.TERMINATION);
                         break;
@@ -101,7 +110,7 @@ public class Grammar {
                 }
             }
         }
-        return right;
+        return new Object[]{right, existNull};
     }
 
     public boolean isBlank(char c){

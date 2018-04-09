@@ -1,1 +1,7 @@
-a * b + c * d * a + a * e
+if ( a == 4 ) then
+    cc = 4;
+else
+    if ( b > c ) then
+        ab = 6 + 4;
+    else
+        l = 5;

@@ -101,9 +101,9 @@ public class Parser {
     public void init(){
         // 计算first集合
         getFirst();
+        output(this.first, "FIRST");
         // 计算follow集合
         getFollow();
-        output(this.first, "FIRST");
         System.out.println();
         output(this.follow, "FOLLOW");
         // 计算closure和goto
@@ -123,7 +123,8 @@ public class Parser {
     }
     public Set<String> calFirst(String key){
         Set<String> result = new HashSet<>();
-        List<List<Symbol>> right = grammar.grammar.get(key).right;
+        Production production = grammar.grammar.get(key);
+        List<List<Symbol>> right = production.right;
         //遍历所有产生式的表达式
         for(int i = 0, len1 = right.size(); i < len1; i++){
             for(int j = 0, len2 = right.get(i).size(); j < len2; j++){
@@ -132,7 +133,8 @@ public class Parser {
                     result.add(symbol.str);
                     break;
                 }else{
-                    if(key.equals(symbol.str)) break;
+                    if(key.equals(symbol.str) && production.existNull()) continue;
+                    else if(key.equals(symbol.str)) break;
                     else{
                         //如果first集中以求解出，则直接使用，否则递归求解
                         Set<String> nextFirst = null;
@@ -165,16 +167,84 @@ public class Parser {
     }
     public void getFollow(){
         Set<String> nontermination = grammar.nontermination;
+        Set<String> used = new HashSet<>();
         for (String key : nontermination){
             if(!follow.containsKey(key)){
-                follow.put(key, calFollow(key));
+                follow.put(key, calFollow(key, used));
             }
         }
     }
 
-    public Set<String> calFollow(String key){
+//    public void getFollow(){
+//        Map<String, Set<String>> follow = new HashMap<>();
+//        Set<String> nontermination = grammar.nontermination;
+//        for (String key : nontermination){
+//            follow.put(key, new HashSet<>());
+//            this.follow.put(key, new HashSet<>());
+//        }
+//        // 将$加入开始符号的follow集中
+//        this.follow.get(grammar.begin).add("$");
+//        for (String key : nontermination){
+//            Set<String> nextFollow = follow.get(key);
+//            Set<String> f = this.follow.get(key);
+//            // 遍历整个文法
+//            for(String k : nontermination){
+//                Production production = grammar.grammar.get(k);
+//                List<List<Symbol>> right = production.right;
+//                for(int i = 0, len1 = right.size(); i < len1; i++){
+//                    for(int j = 0, len2 = right.get(i).size(); j < len2; j++){
+//                        Symbol symbol = right.get(i).get(j);
+//                        // 遍历到非终止符号key时
+//                        if(key.equals(symbol.str)){
+//                            // 如果出现了S -> AaS' 的情况，将FOLLOW(S)加入FOLLOW(S')中
+//                            if(j == len2 - 1){
+//                                if(!production.left.equals(symbol)) {
+//                                    nextFollow.add(k);
+//                                }
+//                            }else{
+//                                // 如果是S -> AS'a或者AS'BC的情况
+//                                Symbol nextSymbol = right.get(i).get(j + 1);
+//                                if(nextSymbol.isTermination()){
+//                                    f.add(nextSymbol.str);
+//                                }else{
+//                                    // 邻接的非终止符号的first集合
+//                                    Set<String> first = null;
+//                                    do {
+//                                        first = this.first.get(nextSymbol.str);
+//                                        // 如果包含空，则FOLLOW(S') = {FIRST(B) - ε} U {FIRST(C) - ε} U FOLLOW(S)
+//                                        if(first.contains("ε")){
+//                                            Set<String> temp = new HashSet<>();
+//                                            temp.addAll(first);
+//                                            temp.remove("ε");
+//                                            f.addAll(temp);
+//                                            // 如果是S -> AS'BC AS'bc
+//                                            nextSymbol = right.get(i).get(j + 1);
+//                                            // 加入FOLLOW(S)
+//                                            if(j == len2 - 2){
+//                                                nextFollow.add(k);
+//                                            }
+//                                            j++;
+//                                        }else{
+//                                            f.addAll(first);
+//                                            break;
+//                                        }
+//                                    }while(j < len2 - 1 && !symbol.isTermination());
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        for()
+//    }
+
+    public Set<String> calFollow(String key, Set<String> used){
         Set<String> result = new HashSet<>();
-        result.add("$");
+        used.add(key);
+        if(key.equals(grammar.begin))
+            result.add("$");
         // 遍历整个文法
         for(String k : grammar.nontermination) {
             Production p  = grammar.grammar.get(k);
@@ -182,19 +252,19 @@ public class Parser {
             for (int i = 0, len1 = right.size(); i < len1; i++) {
                 for (int j = 0, len2 = right.get(i).size(); j < len2; j++) {
                     Symbol symbol = right.get(i).get(j);
-                    if(!symbol.isTermination() && key.equals(symbol.str)){
+                    if(key.equals(symbol.str) && !symbol.isTermination() ){
                         // 如果出现了S -> AaS' 的情况，将FOLLOW(S)加入FOLLOW(S')中
                         if(j == len2 - 1){
-                            if(!p.left.str.equals(symbol.str)) {
-                                Set<String> temp = null;
-                                if (follow.containsKey(p.left.str)) {
-                                    temp = follow.get(p.left.str);
-                                } else {
-                                    temp = calFollow(p.left.str);
-                                    follow.put(p.left.str, temp);
-                                }
-                                result.addAll(temp);
+                            Set<String> temp = null;
+                            if (follow.containsKey(p.left.str)) {
+                                temp = follow.get(p.left.str);
+                            } else {
+                                // 避免循环递归
+                                if(used.contains(p.left.str)) break;
+                                temp = calFollow(p.left.str, used);
+//                                    follow.put(p.left.str, temp);
                             }
+                            result.addAll(temp);
                         }else{
                             // 如果是S -> AS'a或者AS'BC的情况
                             Symbol nextSymbol = right.get(i).get(j + 1);
@@ -204,6 +274,14 @@ public class Parser {
                                 // 邻接的非终止符号的first集合
                                 Set<String> first = null;
                                 do {
+                                    if(used.contains(nextSymbol.str)){
+                                        Production nextProduction = grammar.grammar.get(nextSymbol.str);
+                                        if(nextProduction.existNull()){
+                                            continue;
+                                        }else{
+                                            break;
+                                        }
+                                    }
                                     first = this.first.get(nextSymbol.str);
                                     // 如果包含空，则FOLLOW(S') = {FIRST(B) - ε} U {FIRST(C) - ε} U FOLLOW(S)
                                     if(first.contains("ε")){
@@ -218,8 +296,8 @@ public class Parser {
                                             if(follow.containsKey(p.left.str)){
                                                 temp = follow.get(p.left.str);
                                             }else{
-                                                temp = calFollow(p.left.str);
-                                                follow.put(p.left.str, temp);
+                                                temp = calFollow(p.left.str, used);
+//                                                follow.put(p.left.str, temp);
                                             }
                                             result.addAll(temp);
                                         }
@@ -235,6 +313,7 @@ public class Parser {
                 }
             }
         }
+        used.remove(key);
         return result;
     }
 
